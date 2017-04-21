@@ -50,7 +50,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
             DB::query('UPDATE "Group" SET "AccessAllSubsites" = 1 WHERE "SubsiteID" = 0');
 
             // Move the field out of the way so that this migration doesn't get executed again
-            DB::get_schema()->renameField(Group::class, 'SubsiteID', '_obsolete_SubsiteID');
+            DB::get_schema()->renameField('Group', 'SubsiteID', '_obsolete_SubsiteID');
 
         // No subsite access on anything means that we've just installed the subsites module.
         // Make all previous groups global-access groups
