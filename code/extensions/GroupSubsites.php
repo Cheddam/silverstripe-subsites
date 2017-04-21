@@ -1,16 +1,18 @@
 <?php
 
+use SilverStripe\Control\Cookie;
+use SilverStripe\Core\Convert;
+use SilverStripe\Forms\CheckboxSetField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\OptionsetField;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\ORM\DataQuery;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DB;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Security\Group;
-use SilverStripe\ORM\DB;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Core\Convert;
-use SilverStripe\Forms\OptionsetField;
-use SilverStripe\Forms\CheckboxSetField;
-use SilverStripe\Forms\ReadonlyField;
-use SilverStripe\Control\Cookie;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\Security\PermissionProvider;
+
 /**
  * Extension for the Group object to add subsites support
  *
@@ -52,7 +54,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
 
         // No subsite access on anything means that we've just installed the subsites module.
         // Make all previous groups global-access groups
-        } elseif (!DB::query('SELECT "Group"."ID" FROM "Group" 
+        } elseif (!DB::query('SELECT "Group"."ID" FROM "Group"
 			LEFT JOIN "Group_Subsites" ON "Group_Subsites"."GroupID" = "Group"."ID" AND "Group_Subsites"."SubsiteID" > 0
 			WHERE "AccessAllSubsites" = 1
 			OR "Group_Subsites"."GroupID" IS NOT NULL ')->value()) {
@@ -120,7 +122,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
     /**
      * Update any requests to limit the results to the current site
      */
-    public function augmentSQL(SQLSelect $query)
+    public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
         if (Subsite::$disable_subsite_filter) {
             return;
@@ -146,7 +148,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
 
             if (!$hasGroupSubsites) {
                 if ($subsiteID) {
-                    $query->addLeftJoin("Group_Subsites", "\"Group_Subsites\".\"GroupID\" 
+                    $query->addLeftJoin("Group_Subsites", "\"Group_Subsites\".\"GroupID\"
 						= \"Group\".\"ID\" AND \"Group_Subsites\".\"SubsiteID\" = $subsiteID");
                     $query->addWhere("(\"Group_Subsites\".\"SubsiteID\" IS NOT NULL OR
 						\"Group\".\"AccessAllSubsites\" = 1)");

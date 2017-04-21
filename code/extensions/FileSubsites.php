@@ -6,6 +6,7 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Control\Session;
 use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\ORM\DataQuery;
 use SilverStripe\Security\Permission;
 use SilverStripe\ORM\DataExtension;
 /**
@@ -71,7 +72,7 @@ class FileSubsites extends DataExtension
     /**
      * Update any requests to limit the results to the current site
      */
-    public function augmentSQL(SQLSelect &$query)
+    public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
         if (Subsite::$disable_subsite_filter) {
             return;
