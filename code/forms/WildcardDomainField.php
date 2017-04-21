@@ -1,5 +1,7 @@
 <?php
 
+use SilverStripe\Forms\TextField;
+
 /**
  * A text field that accepts only valid domain names, but allows the wildcard (*) character
  */

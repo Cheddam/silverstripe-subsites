@@ -1,5 +1,12 @@
 <?php
 
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DataQuery;
+use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\SiteConfig\SiteConfig;
+
 /**
  * Extension for the SiteConfig object to add subsites support
  */
@@ -8,11 +15,11 @@ class SiteConfigSubsites extends DataExtension
     private static $has_one = array(
         'Subsite' => 'Subsite', // The subsite that this page belongs to
     );
-    
+
     /**
      * Update any requests to limit the results to the current site
      */
-    public function augmentSQL(SQLQuery &$query)
+    public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
         if (Subsite::$disable_subsite_filter) {
             return;
@@ -29,15 +36,16 @@ class SiteConfigSubsites extends DataExtension
             }
         }
 
-        /*if($context = DataObject::context_obj()) $subsiteID = (int)$context->SubsiteID;
-        else */$subsiteID = (int)Subsite::currentSubsiteID();
+        $subsiteID = (int)Subsite::currentSubsiteID();
 
-        $froms=$query->getFrom();
-        $froms=array_keys($froms);
+        $froms = $query->getFrom();
+        $froms = array_keys($froms);
         $tableName = array_shift($froms);
-        if ($tableName != 'SiteConfig') {
+
+        if ($tableName != SiteConfig::class) {
             return;
         }
+
         $query->addWhere("\"$tableName\".\"SubsiteID\" IN ($subsiteID)");
     }
 

@@ -1,5 +1,12 @@
 <?php
 
+use SilverStripe\Forms\OptionsetField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Controller;
+use SilverStripe\ORM\DataObject;
+
 /**
  * @property string $Domain domain name of this subsite. Can include wildcards. Do not include the URL scheme here
  * @property string $Protocol Required protocol (http or https) if only one is supported. 'automatic' implies

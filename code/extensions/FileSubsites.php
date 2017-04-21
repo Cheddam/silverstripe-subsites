@@ -1,4 +1,14 @@
 <?php
+
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Assets\Folder;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Control\Session;
+use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\ORM\DataQuery;
+use SilverStripe\Security\Permission;
+use SilverStripe\ORM\DataExtension;
 /**
  * Extension for the File object to add subsites support
  *
@@ -9,7 +19,7 @@ class FileSubsites extends DataExtension
     // If this is set to true, all folders created will be default be
     // considered 'global', unless set otherwise
     public static $default_root_folders_global = false;
-    
+
     private static $has_one=array(
         'Subsite' => 'Subsite',
     );
@@ -62,7 +72,7 @@ class FileSubsites extends DataExtension
     /**
      * Update any requests to limit the results to the current site
      */
-    public function augmentSQL(SQLQuery &$query)
+    public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
         if (Subsite::$disable_subsite_filter) {
             return;
@@ -130,7 +140,7 @@ class FileSubsites extends DataExtension
             return $access;
         }
     }
-    
+
     /**
      * Return a piece of text to keep DataObject cache keys appropriately specific
      */

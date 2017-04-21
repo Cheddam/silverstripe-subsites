@@ -1,4 +1,17 @@
 <?php
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\View\ArrayData;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Control\Controller;
+use SilverStripe\Forms\LabelField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Control\Session;
+use SilverStripe\CMS\Model\VirtualPage;
+
 class SubsitesVirtualPage extends VirtualPage
 {
     private static $description = 'Displays the content of a page on another subsite';
@@ -37,7 +50,7 @@ class SubsitesVirtualPage extends VirtualPage
         $pageSelectionField = new SubsitesTreeDropdownField(
             "CopyContentFromID",
             _t('VirtualPage.CHOOSE', "Choose a page to link to"),
-            "SiteTree",
+            SiteTree::class,
             "ID",
             "MenuTitle"
         );
@@ -140,7 +153,7 @@ class SubsitesVirtualPage extends VirtualPage
         $oldState = Subsite::$disable_subsite_filter;
         Subsite::$disable_subsite_filter = true;
         if ($this->CopyContentFromID) {
-            $this->HasBrokenLink = DataObject::get_by_id('SiteTree', $this->CopyContentFromID) ? false : true;
+            $this->HasBrokenLink = DataObject::get_by_id(SiteTree::class, $this->CopyContentFromID) ? false : true;
         }
         Subsite::$disable_subsite_filter = $oldState;
     }
@@ -172,22 +185,22 @@ class SubsitesVirtualPage extends VirtualPage
     }
 }
 
-class SubsitesVirtualPage_Controller extends VirtualPage_Controller
-{
-    public function reloadContent()
-    {
-        $this->failover->copyFrom($this->failover->CopyContentFrom());
-        $this->failover->write();
-        return;
-    }
-
-    public function init()
-    {
-        $origDisableSubsiteFilter = Subsite::$disable_subsite_filter;
-        Subsite::$disable_subsite_filter = true;
-
-        parent::init();
-
-        Subsite::$disable_subsite_filter = $origDisableSubsiteFilter;
-    }
-}
+//class SubsitesVirtualPage_Controller extends VirtualPage_Controller
+//{
+//    public function reloadContent()
+//    {
+//        $this->failover->copyFrom($this->failover->CopyContentFrom());
+//        $this->failover->write();
+//        return;
+//    }
+//
+//    public function init()
+//    {
+//        $origDisableSubsiteFilter = Subsite::$disable_subsite_filter;
+//        Subsite::$disable_subsite_filter = true;
+//
+//        parent::init();
+//
+//        Subsite::$disable_subsite_filter = $origDisableSubsiteFilter;
+//    }
+//}

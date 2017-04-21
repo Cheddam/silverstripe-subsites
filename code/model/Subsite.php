@@ -1,4 +1,36 @@
 <?php
+
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\i18n\Data\Intl\IntlLocales;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Control\Session;
+use SilverStripe\i18n\i18n;
+use SilverStripe\Security\Permission;
+use SilverStripe\Security\Member;
+use SilverStripe\Core\Convert;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\Admin\CMSMenu;
+use SilverStripe\ORM\DataList;
+use SilverStripe\Security\Group;
+use SilverStripe\Security\PermissionRole;
+use SilverStripe\Security\PermissionRoleCode;
+use SilverStripe\Control\Director;
+use SilverStripe\ORM\DB;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\CheckboxSetField;
+use SilverStripe\Forms\Tab;
+use SilverStripe\Forms\TabSet;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\ArrayLib;
+use SilverStripe\Versioned\Versioned;
 /**
  * A dynamically created subsite. SiteTree objects can now belong to a subsite.
  * You can simulate subsite access without setting up virtual hosts by appending ?SubsiteID=<ID> to the request.
@@ -110,6 +142,7 @@ class Subsite extends DataObject
         } elseif (Subsite::$use_session_subsiteid) {
             $id = Session::get('SubsiteID');
         }
+
 
         if ($id === null) {
             $id = self::getSubsiteIDForDomain();
@@ -284,7 +317,7 @@ class Subsite extends DataObject
             return new ArrayList();
         }
         if (!is_object($member)) {
-            $member = DataObject::get_by_id('Member', $member);
+            $member = DataObject::get_by_id(Member::class, $member);
         }
 
         $subsites = new ArrayList();
@@ -329,7 +362,7 @@ class Subsite extends DataObject
             return new ArrayList();
         }
         if (!is_object($member)) {
-            $member = DataObject::get_by_id('Member', $member);
+            $member = DataObject::get_by_id(Member::class, $member);
         }
 
         // Rationalise permCode argument
@@ -540,7 +573,7 @@ class Subsite extends DataObject
      * @var array
      */
     private static $belongs_many_many = array(
-        "Groups" => "Group",
+        "Groups" => Group::class,
     );
 
     /**
@@ -600,7 +633,7 @@ class Subsite extends DataObject
         $languageSelector = new DropdownField(
             'Language',
             $this->fieldLabel('Language'),
-            i18n::get_common_locales()
+            Injector::inst()->get(IntlLocales::class)->getLocales()
         );
 
         $pageTypeMap = array();
@@ -615,10 +648,11 @@ class Subsite extends DataObject
                 new Tab(
                     'Configuration',
                     _t('Subsite.TabTitleConfig', 'Configuration'),
-                    new HeaderField($this->getClassName() . ' configuration', 2),
+                    new HeaderField('ConfigForSubsiteHeaderField', $this->getClassName() . ' configuration'),
                     new TextField('Title', $this->fieldLabel('Title'), $this->Title),
 
                     new HeaderField(
+                        'DomainsForSubsiteHeaderField',
                         _t('Subsite.DomainsHeadline', "Domains for this subsite")
                     ),
                     $domainTable,
@@ -856,7 +890,7 @@ JS;
         $SQL_permissionCodes = join("','", $SQL_permissionCodes);
 
         return DataObject::get(
-            'Member',
+            Member::class,
             "\"Group\".\"SubsiteID\" = $this->ID AND \"Permission\".\"Code\" IN ('$SQL_permissionCodes')",
             '',
             "LEFT JOIN \"Group_Members\" ON \"Member\".\"ID\" = \"Group_Members\".\"MemberID\"

@@ -13,6 +13,13 @@ use SilverStripe\BehatExtension\Context\FixtureContext;
 use SilverStripe\Framework\Test\Behaviour\CmsFormsContext;
 use SilverStripe\Framework\Test\Behaviour\CmsUiContext;
 use SilverStripe\Cms\Test\Behaviour;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\FixtureBlueprint;
+use SilverStripe\Security\Member;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Core\ClassInfo;
+use SilverStripe\Dev\BehatFixtureFactory;
+
 
 // PHPUnit
 require_once 'PHPUnit/Autoload.php';
@@ -52,17 +59,17 @@ class FeatureContext extends SilverStripeContext
 
         // Use blueprints to set user name from identifier
         $factory = $fixtureContext->getFixtureFactory();
-        $blueprint = \Injector::inst()->create('FixtureBlueprint', 'Member');
+        $blueprint = Injector::inst()->create(FixtureBlueprint::class, Member::class);
         $blueprint->addCallback('beforeCreate', function ($identifier, &$data, &$fixtures) {
             if (!isset($data['FirstName'])) {
                 $data['FirstName'] = $identifier;
             }
         });
-        $factory->define('Member', $blueprint);
+        $factory->define(Member::class, $blueprint);
 
         // Auto-publish pages
-        foreach (\ClassInfo::subclassesFor('SiteTree') as $id => $class) {
-            $blueprint = \Injector::inst()->create('FixtureBlueprint', $class);
+        foreach (ClassInfo::subclassesFor(SiteTree::class) as $id => $class) {
+            $blueprint = Injector::inst()->create(FixtureBlueprint::class, $class);
             $blueprint->addCallback('afterCreate', function ($obj, $identifier, &$data, &$fixtures) {
                 $obj->publish('Stage', 'Live');
             });
@@ -85,7 +92,7 @@ class FeatureContext extends SilverStripeContext
     public function getFixtureFactory()
     {
         if (!$this->fixtureFactory) {
-            $this->fixtureFactory = \Injector::inst()->create('BehatFixtureFactory');
+            $this->fixtureFactory = Injector::inst()->create(BehatFixtureFactory::class);
         }
 
         return $this->fixtureFactory;

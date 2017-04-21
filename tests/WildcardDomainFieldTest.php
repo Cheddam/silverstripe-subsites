@@ -1,5 +1,7 @@
 <?php
 
+use SilverStripe\Dev\SapphireTest;
+
 /**
  * Tests {@see WildcardDomainField}
  */
