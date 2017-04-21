@@ -1,10 +1,11 @@
 <?php
 
-use SilverStripe\ORM\Queries\SQLSelect;
-use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DataQuery;
+use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Extension for the SiteConfig object to add subsites support
@@ -18,7 +19,7 @@ class SiteConfigSubsites extends DataExtension
     /**
      * Update any requests to limit the results to the current site
      */
-    public function augmentSQL(SQLSelect $query)
+    public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
         if (Subsite::$disable_subsite_filter) {
             return;
