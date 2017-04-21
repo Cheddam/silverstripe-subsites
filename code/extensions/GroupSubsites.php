@@ -72,7 +72,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
             $subsiteMap = $subsites->map();
 
             // Prevent XSS injection
-            $subsiteMap = Convert::raw2xml($subsiteMap);
+            $subsiteMap = Convert::raw2xml($subsiteMap->toArray());
 
             // Interface is different if you have the rights to modify subsite group values on
             // all subsites

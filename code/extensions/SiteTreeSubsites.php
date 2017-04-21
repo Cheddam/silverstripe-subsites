@@ -96,8 +96,8 @@ class SiteTreeSubsites extends DataExtension
         $subsites = Subsite::accessible_sites("CMS_ACCESS_CMSMain");
         $subsitesMap = array();
         if ($subsites && $subsites->Count()) {
-            $subsitesMap = $subsites->map('ID', 'Title');
-            unset($subsitesMap[$this->owner->SubsiteID]);
+            $subsitesToMap = $subsites->exclude('ID', $this->owner->SubsiteID);
+            $subsitesMap = $subsitesToMap->map('ID', 'Title');
         }
 
         // Master page edit field (only allowed from default subsite to avoid inconsistent relationships)
@@ -119,7 +119,8 @@ class SiteTreeSubsites extends DataExtension
 				)->setHeadingLevel(4)
             );
 
-            $copyAction->includeDefaultJS(false);
+
+//            $copyAction->includeDefaultJS(false);
         }
 
         // replace readonly link prefix

@@ -1,5 +1,7 @@
 <?php
 
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\i18n\Data\Intl\IntlLocales;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Control\Session;
 use SilverStripe\i18n\i18n;
@@ -140,6 +142,7 @@ class Subsite extends DataObject
         } elseif (Subsite::$use_session_subsiteid) {
             $id = Session::get('SubsiteID');
         }
+
 
         if ($id === null) {
             $id = self::getSubsiteIDForDomain();
@@ -630,7 +633,7 @@ class Subsite extends DataObject
         $languageSelector = new DropdownField(
             'Language',
             $this->fieldLabel('Language'),
-            i18n::get_common_locales()
+            Injector::inst()->get(IntlLocales::class)->getLocales()
         );
 
         $pageTypeMap = array();
@@ -645,10 +648,11 @@ class Subsite extends DataObject
                 new Tab(
                     'Configuration',
                     _t('Subsite.TabTitleConfig', 'Configuration'),
-                    new HeaderField($this->getClassName() . ' configuration', 2),
+                    new HeaderField('ConfigForSubsiteHeaderField', $this->getClassName() . ' configuration'),
                     new TextField('Title', $this->fieldLabel('Title'), $this->Title),
 
                     new HeaderField(
+                        'DomainsForSubsiteHeaderField',
                         _t('Subsite.DomainsHeadline', "Domains for this subsite")
                     ),
                     $domainTable,
