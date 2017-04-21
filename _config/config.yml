@@ -1,10 +1,10 @@
 ---
 Name: mysiteconfig
-After: 'framework/*','cms/*'
+After:
+  - 'framework/*'
 ---
 AssetAdmin:
   treats_subsite_0_as_global: true
-
-Director:
+SilverStripe\Control\Director:
   rules:
-    'SubsiteXHRController': 'SubsiteXHRController'
+    SubsiteXHRController: SubsiteXHRController

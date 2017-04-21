@@ -1,5 +1,8 @@
 <?php
 
+use SilverStripe\Security\Permission;
+use SilverStripe\Admin\LeftAndMain;
+
 /**
  * Section-agnostic PJAX controller.
  */

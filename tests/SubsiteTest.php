@@ -1,5 +1,11 @@
 <?php
 
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Director;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Security\Member;
+
 class SubsiteTest extends BaseSubsiteTest
 {
     public static $fixture_file = 'subsites/tests/SubsiteTest.yml';
@@ -22,7 +28,7 @@ class SubsiteTest extends BaseSubsiteTest
     {
         parent::setUp();
 
-        Config::inst()->update('Director', 'alternate_base_url', '/');
+        Config::inst()->update(Director::class, 'alternate_base_url', '/');
         $this->origStrictSubdomainMatching = Subsite::$strict_subdomain_matching;
         $this->origServer = $_SERVER;
         Subsite::$strict_subdomain_matching = false;
@@ -53,7 +59,7 @@ class SubsiteTest extends BaseSubsiteTest
         $tmplHome = DataObject::get_one('Page', "\"URLSegment\" = 'home'");
 
         // Publish all the pages in the template, testing that DataObject::get only returns pages from the chosen subsite
-        $pages = DataObject::get("SiteTree");
+        $pages = DataObject::get(SiteTree::class);
         $totalPages = $pages->Count();
         foreach ($pages as $page) {
             $this->assertEquals($template->ID, $page->SubsiteID);
@@ -332,7 +338,7 @@ class SubsiteTest extends BaseSubsiteTest
 
     public function testAllAccessibleSites()
     {
-        $member = $this->objFromFixture('Member', 'subsite1member');
+        $member = $this->objFromFixture(Member::class, 'subsite1member');
 
         $subsites = Subsite::all_accessible_sites(true, 'Main site', $member);
         $this->assertDOSEquals(array(
@@ -346,13 +352,13 @@ class SubsiteTest extends BaseSubsiteTest
     public function testAccessibleSites()
     {
         $member1Sites = Subsite::accessible_sites("CMS_ACCESS_CMSMain", false, null,
-            $this->objFromFixture('Member', 'subsite1member'));
+            $this->objFromFixture(Member::class, 'subsite1member'));
         $member1SiteTitles = $member1Sites->column("Title");
         sort($member1SiteTitles);
         $this->assertEquals('Subsite1 Template', $member1SiteTitles[0], 'Member can get to a subsite via a group');
 
         $adminSites = Subsite::accessible_sites("CMS_ACCESS_CMSMain", false, null,
-            $this->objFromFixture('Member', 'admin'));
+            $this->objFromFixture(Member::class, 'admin'));
         $adminSiteTitles = $adminSites->column("Title");
         sort($adminSiteTitles);
         $this->assertEquals(array(
@@ -368,7 +374,7 @@ class SubsiteTest extends BaseSubsiteTest
 
         $member2Sites = Subsite::accessible_sites(
             "CMS_ACCESS_CMSMain", false, null,
-            $this->objFromFixture('Member', 'subsite1member2')
+            $this->objFromFixture(Member::class, 'subsite1member2')
         );
         $member2SiteTitles = $member2Sites->column("Title");
         sort($member2SiteTitles);
@@ -377,10 +383,10 @@ class SubsiteTest extends BaseSubsiteTest
 
     public function testhasMainSitePermission()
     {
-        $admin = $this->objFromFixture('Member', 'admin');
-        $subsite1member = $this->objFromFixture('Member', 'subsite1member');
-        $subsite1admin = $this->objFromFixture('Member', 'subsite1admin');
-        $allsubsitesauthor = $this->objFromFixture('Member', 'allsubsitesauthor');
+        $admin = $this->objFromFixture(Member::class, 'admin');
+        $subsite1member = $this->objFromFixture(Member::class, 'subsite1member');
+        $subsite1admin = $this->objFromFixture(Member::class, 'subsite1admin');
+        $allsubsitesauthor = $this->objFromFixture(Member::class, 'allsubsitesauthor');
 
         $this->assertTrue(
             Subsite::hasMainSitePermission($admin),

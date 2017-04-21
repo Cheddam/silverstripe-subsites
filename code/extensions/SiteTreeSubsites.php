@@ -1,5 +1,24 @@
 <?php
 
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\ORM\DataQuery;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\InlineFormAction;
+use SilverStripe\Forms\ToggleCompositeField;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Controller;
+use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Member;
+use SilverStripe\View\SSViewer;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTP;
+use SilverStripe\Core\Convert;
+use SilverStripe\ORM\DataExtension;
+
 /**
  * Extension for the SiteTree object to add subsites support
  */
@@ -10,7 +29,7 @@ class SiteTreeSubsites extends DataExtension
     );
 
     private static $many_many = array(
-        'CrossSubsiteLinkTracking' => 'SiteTree' // Stored separately, as the logic for URL rewriting is different
+        'CrossSubsiteLinkTracking' => SiteTree::class // Stored separately, as the logic for URL rewriting is different
     );
 
     private static $many_many_extraFields = array(
@@ -25,10 +44,12 @@ class SiteTreeSubsites extends DataExtension
         return false;
     }
 
-    /**
-     * Update any requests to limit the results to the current site
-     */
-    public function augmentSQL(SQLQuery &$query, DataQuery &$dataQuery = null)
+	/**
+	 * Update any requests to limit the results to the current site
+	 * @param SQLSelect $query
+	 * @param DataQuery $dataQuery
+	 */
+    public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
         if (Subsite::$disable_subsite_filter) {
             return;
@@ -53,7 +74,7 @@ class SiteTreeSubsites extends DataExtension
         // The foreach is an ugly way of getting the first key :-)
         foreach ($query->getFrom() as $tableName => $info) {
             // The tableName should be SiteTree or SiteTree_Live...
-            if (strpos($tableName, 'SiteTree') === false) {
+            if (strpos($tableName, SiteTree::class) === false) {
                 break;
             }
             $query->addWhere("\"$tableName\".\"SubsiteID\" IN ($subsiteID)");
@@ -103,7 +124,7 @@ class SiteTreeSubsites extends DataExtension
 
         // replace readonly link prefix
         $subsite = $this->owner->Subsite();
-        $nested_urls_enabled = Config::inst()->get('SiteTree', 'nested_urls');
+        $nested_urls_enabled = Config::inst()->get(SiteTree::class, 'nested_urls');
         if ($subsite && $subsite->exists()) {
             // Use baseurl from domain
             $baseLink = $subsite->absoluteBaseURL();
@@ -129,7 +150,7 @@ class SiteTreeSubsites extends DataExtension
         if (!$this->owner->SubsiteID) {
             return false;
         }
-        $sc = DataObject::get_one('SiteConfig', '"SubsiteID" = ' . $this->owner->SubsiteID);
+        $sc = DataObject::get_one(SiteConfig::class, '"SubsiteID" = ' . $this->owner->SubsiteID);
         if (!$sc) {
             $sc = new SiteConfig();
             $sc->SubsiteID = $this->owner->SubsiteID;
@@ -263,7 +284,7 @@ class SiteTreeSubsites extends DataExtension
         $subsite = Subsite::currentSubsite();
 
         if ($subsite && $subsite->Theme) {
-            Config::inst()->update('SSViewer', 'theme', Subsite::currentSubsite()->Theme);
+            Config::inst()->update(SSViewer::class, 'theme', Subsite::currentSubsite()->Theme);
         }
     }
 
@@ -324,7 +345,7 @@ class SiteTreeSubsites extends DataExtension
 
                     $origDisableSubsiteFilter = Subsite::$disable_subsite_filter;
                         Subsite::disable_subsite_filter(true);
-                        $candidatePage = DataObject::get_one("SiteTree", "\"URLSegment\" = '" . Convert::raw2sql(urldecode($rest)) . "' AND \"SubsiteID\" = " . $subsiteID, false);
+                        $candidatePage = DataObject::get_one(SiteTree::class, "\"URLSegment\" = '" . Convert::raw2sql(urldecode($rest)) . "' AND \"SubsiteID\" = " . $subsiteID, false);
                         Subsite::disable_subsite_filter($origDisableSubsiteFilter);
 
                         if ($candidatePage) {

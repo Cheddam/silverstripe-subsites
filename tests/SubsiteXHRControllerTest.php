@@ -1,5 +1,8 @@
 <?php
 
+use SilverStripe\Control\Session;
+use SilverStripe\Dev\FunctionalTest;
+
 /**
  * Created by PhpStorm.
  * User: dmooyman

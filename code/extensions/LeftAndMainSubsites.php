@@ -1,4 +1,20 @@
 <?php
+
+use SilverStripe\View\Requirements;
+use SilverStripe\Core\Convert;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Security\Member;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\View\ArrayData;
+use SilverStripe\Security\Permission;
+use SilverStripe\Control\Session;
+use SilverStripe\Admin\CMSMenu;
+use SilverStripe\Security\Security;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Control\Controller;
+use SilverStripe\Core\Extension;
 /**
  * Decorator designed to add subsites support to LeftAndMain
  *
@@ -55,7 +71,7 @@ class LeftAndMainSubsites extends Extension
             return new ArrayList();
         }
         if (!is_object($member)) {
-            $member = DataObject::get_by_id('Member', $member);
+            $member = DataObject::get_by_id(Member::class, $member);
         }
 
         // Collect permissions - honour the LeftAndMain::required_permission_codes, current model requires
@@ -322,7 +338,7 @@ class LeftAndMainSubsites extends Extension
 	 */
     public function copytosubsite($data, $form)
     {
-        $page = DataObject::get_by_id('SiteTree', $data['ID']);
+        $page = DataObject::get_by_id(SiteTree::class, $data['ID']);
         $subsite = DataObject::get_by_id('Subsite', $data['CopyToSubsiteID']);
         $includeChildren = (isset($data['CopyToSubsiteWithChildren'])) ? $data['CopyToSubsiteWithChildren'] : false;
 

@@ -1,4 +1,16 @@
 <?php
+
+use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\Security\Group;
+use SilverStripe\ORM\DB;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Core\Convert;
+use SilverStripe\Forms\OptionsetField;
+use SilverStripe\Forms\CheckboxSetField;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Control\Cookie;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Security\PermissionProvider;
 /**
  * Extension for the Group object to add subsites support
  *
@@ -25,19 +37,19 @@ class GroupSubsites extends DataExtension implements PermissionProvider
     {
         // Migration for Group.SubsiteID data from when Groups only had a single subsite
         $groupFields = DB::field_list('Group');
-        
+
         // Detection of SubsiteID field is the trigger for old-style-subsiteID migration
         if (isset($groupFields['SubsiteID'])) {
             // Migrate subsite-specific data
             DB::query('INSERT INTO "Group_Subsites" ("GroupID", "SubsiteID")
 				SELECT "ID", "SubsiteID" FROM "Group" WHERE "SubsiteID" > 0');
-                
+
             // Migrate global-access data
             DB::query('UPDATE "Group" SET "AccessAllSubsites" = 1 WHERE "SubsiteID" = 0');
-            
+
             // Move the field out of the way so that this migration doesn't get executed again
-            DB::get_schema()->renameField('Group', 'SubsiteID', '_obsolete_SubsiteID');
-            
+            DB::get_schema()->renameField(Group::class, 'SubsiteID', '_obsolete_SubsiteID');
+
         // No subsite access on anything means that we've just installed the subsites module.
         // Make all previous groups global-access groups
         } elseif (!DB::query('SELECT "Group"."ID" FROM "Group" 
@@ -47,7 +59,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
             DB::query('UPDATE "Group" SET "AccessAllSubsites" = 1');
         }
     }
-    
+
     public function updateCMSFields(FieldList $fields)
     {
         if ($this->owner->canEdit()) {
@@ -59,7 +71,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
 
             // Prevent XSS injection
             $subsiteMap = Convert::raw2xml($subsiteMap);
-            
+
             // Interface is different if you have the rights to modify subsite group values on
             // all subsites
             if (isset($subsiteMap[0])) {
@@ -108,7 +120,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
     /**
      * Update any requests to limit the results to the current site
      */
-    public function augmentSQL(SQLQuery &$query)
+    public function augmentSQL(SQLSelect $query)
     {
         if (Subsite::$disable_subsite_filter) {
             return;
@@ -122,7 +134,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
 
             /*if($context = DataObject::context_obj()) $subsiteID = (int)$context->SubsiteID;
             else */$subsiteID = (int)Subsite::currentSubsiteID();
-            
+
             // Don't filter by Group_Subsites if we've already done that
             $hasGroupSubsites = false;
             foreach ($query->getFrom() as $item) {
@@ -131,7 +143,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
                     break;
                 }
             }
-            
+
             if (!$hasGroupSubsites) {
                 if ($subsiteID) {
                     $query->addLeftJoin("Group_Subsites", "\"Group_Subsites\".\"GroupID\" 
@@ -142,11 +154,11 @@ class GroupSubsites extends DataExtension implements PermissionProvider
                     $query->addWhere("\"Group\".\"AccessAllSubsites\" = 1");
                 }
             }
-            
+
             // WORKAROUND for databases that complain about an ORDER BY when the column wasn't selected (e.g. SQL Server)
-            $select=$query->getSelect();
+            $select = $query->getSelect();
             if (isset($select[0]) && !$select[0] == 'COUNT(*)') {
-                $query->orderby = "\"AccessAllSubsites\" DESC" . ($query->orderby ? ', ' : '') . $query->orderby;
+				$query->addOrderBy("AccessAllSubsites", "DESC");
             }
         }
     }
@@ -159,7 +171,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
             $this->owner->AccessAllSubsites = 1;
         }
     }
-    
+
     public function onAfterWrite()
     {
         // New record test approximated by checking whether the ID has changed.
@@ -175,7 +187,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
         // Find the sites that this group belongs to and the sites where we have appropriate perm.
         $accessibleSites = Subsite::accessible_sites('CMS_ACCESS_SecurityAdmin')->column('ID');
         $linkedSites = $this->owner->Subsites()->column('ID');
- 
+
         // We are allowed to access this site if at we have CMS_ACCESS_SecurityAdmin permission on
         // at least one of the sites
         return (bool)array_intersect($accessibleSites, $linkedSites);
