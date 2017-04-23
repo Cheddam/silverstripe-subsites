@@ -1,6 +1,6 @@
 <?php
 
-namespace Subsites\Test\Behaviour;
+namespace SilverStripe\Subsites\Tests\Behaviour;
 
 if (!class_exists('SilverStripe\BehatExtension\Context\SilverStripeContext')) {
     return;
@@ -19,11 +19,6 @@ use SilverStripe\Security\Member;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BehatFixtureFactory;
-
-
-// PHPUnit
-require_once 'PHPUnit/Autoload.php';
-require_once 'PHPUnit/Framework/Assert/Functions.php';
 
 /**
  * Features context
@@ -80,7 +75,7 @@ class FeatureContext extends SilverStripeContext
     public function setMinkParameters(array $parameters)
     {
         parent::setMinkParameters($parameters);
-        
+
         if (isset($parameters['files_path'])) {
             $this->getSubcontext('FixtureContext')->setFilesPath($parameters['files_path']);
         }

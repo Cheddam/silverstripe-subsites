@@ -1,7 +1,10 @@
 <?php
 
-use SilverStripe\Security\Permission;
+namespace SilverStripe\Subsites;
+
 use SilverStripe\Admin\LeftAndMain;
+use SilverStripe\Security\Permission;
+use SilverStripe\Subsites\Model\Subsite;
 
 /**
  * Section-agnostic PJAX controller.

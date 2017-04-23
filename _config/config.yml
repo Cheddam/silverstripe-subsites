@@ -5,6 +5,7 @@ After:
 ---
 AssetAdmin:
   treats_subsite_0_as_global: true
+
 SilverStripe\Control\Director:
   rules:
-    SubsiteXHRController: SubsiteXHRController
+    SubsiteXHRController: SilverStripe\Subsites\SubsiteXHRController

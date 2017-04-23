@@ -1,19 +1,24 @@
 <?php
 
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\View\ArrayData;
-use SilverStripe\Forms\DropdownField;
+namespace SilverStripe\Subsites;
+
 use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Control\Controller;
-use SilverStripe\Forms\LabelField;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\TextareaField;
-use SilverStripe\Control\Session;
 use SilverStripe\CMS\Model\VirtualPage;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Session;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\LabelField;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Subsites\Forms\SubsitesTreeDropdownField;
+use SilverStripe\Subsites\Model\Subsite;
+use SilverStripe\View\ArrayData;
 
 class SubsitesVirtualPage extends VirtualPage
 {
+
     private static $description = 'Displays the content of a page on another subsite';
 
     private static $db = array(
@@ -22,6 +27,8 @@ class SubsitesVirtualPage extends VirtualPage
         'CustomMetaDescription' => 'Text',
         'CustomExtraMeta' => 'HTMLText'
     );
+
+    private static $table_name = "SubsitesVirtualPage";
 
     public function getCMSFields()
     {
@@ -183,6 +190,7 @@ class SubsitesVirtualPage extends VirtualPage
             $this->ExtraMeta = $this->ContentSource()->ExtraMeta ? $this->ContentSource()->ExtraMeta : $this->ExtraMeta;
         }
     }
+
 }
 
 //class SubsitesVirtualPage_Controller extends VirtualPage_Controller

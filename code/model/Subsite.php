@@ -1,36 +1,39 @@
 <?php
 
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\i18n\Data\Intl\IntlLocales;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\Control\Session;
-use SilverStripe\i18n\i18n;
-use SilverStripe\Security\Permission;
-use SilverStripe\Security\Member;
-use SilverStripe\Core\Convert;
-use SilverStripe\ORM\ArrayList;
+namespace SilverStripe\Subsites\Model;
+
 use SilverStripe\Admin\CMSMenu;
-use SilverStripe\ORM\DataList;
-use SilverStripe\Security\Group;
-use SilverStripe\Security\PermissionRole;
-use SilverStripe\Security\PermissionRoleCode;
-use SilverStripe\Control\Director;
-use SilverStripe\ORM\DB;
-use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\DropdownField;
 use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Forms\HeaderField;
-use SilverStripe\Forms\TextField;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Session;
+use SilverStripe\Core\Convert;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\i18n\i18n;
+use SilverStripe\i18n\Data\Intl\IntlLocales;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\CheckboxSetField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
-use SilverStripe\Forms\HiddenField;
-use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
 use SilverStripe\ORM\ArrayLib;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DB;
+use SilverStripe\Security\Group;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
+use SilverStripe\Security\PermissionRole;
+use SilverStripe\Security\PermissionRoleCode;
 use SilverStripe\Versioned\Versioned;
+
 /**
  * A dynamically created subsite. SiteTree objects can now belong to a subsite.
  * You can simulate subsite access without setting up virtual hosts by appending ?SubsiteID=<ID> to the request.
@@ -118,7 +121,7 @@ class Subsite extends DataObject
     public static function currentSubsite()
     {
         // get_by_id handles caching so we don't have to
-        return DataObject::get_by_id('Subsite', self::currentSubsiteID());
+        return DataObject::get_by_id(Subsite::class, self::currentSubsiteID());
     }
 
     /**
@@ -213,7 +216,7 @@ class Subsite extends DataObject
 
             $SQL_host = Convert::raw2sql($host);
             $matchingDomains = DataObject::get(
-                "SubsiteDomain",
+                SubsiteDomain::class,
                 "'$SQL_host' LIKE replace(\"SubsiteDomain\".\"Domain\",'*','%')",
                 "\"IsPrimary\" DESC"
             )->innerJoin('Subsite', "\"Subsite\".\"ID\" = \"SubsiteDomain\".\"SubsiteID\" AND \"Subsite\".\"IsPublic\"=1");
@@ -231,7 +234,7 @@ class Subsite extends DataObject
             }
 
             $subsiteID = $subsiteIDs[0];
-        } elseif ($default = DataObject::get_one('Subsite', "\"DefaultSite\" = 1")) {
+        } elseif ($default = DataObject::get_one(Subsite::class, "\"DefaultSite\" = 1")) {
             // Check for a 'default' subsite
             $subsiteID = $default->ID;
         } else {
@@ -516,33 +519,32 @@ class Subsite extends DataObject
 
         // Count this user's groups which can access the main site
         $groupCount = DB::query("
-			SELECT COUNT(\"Permission\".\"ID\")
-			FROM \"Permission\"
-			INNER JOIN \"Group\" ON \"Group\".\"ID\" = \"Permission\".\"GroupID\" AND \"Group\".\"AccessAllSubsites\" = 1
-			INNER JOIN \"Group_Members\" ON \"Group_Members\".\"GroupID\" = \"Permission\".\"GroupID\"
-			WHERE \"Permission\".\"Code\" IN ('$SQL_perms')
-			AND \"MemberID\" = {$memberID}
-		")->value();
+            SELECT COUNT(\"Permission\".\"ID\")
+            FROM \"Permission\"
+            INNER JOIN \"Group\" ON \"Group\".\"ID\" = \"Permission\".\"GroupID\" AND \"Group\".\"AccessAllSubsites\" = 1
+            INNER JOIN \"Group_Members\" ON \"Group_Members\".\"GroupID\" = \"Permission\".\"GroupID\"
+            WHERE \"Permission\".\"Code\" IN ('$SQL_perms')
+            AND \"MemberID\" = {$memberID}
+        ")->value();
 
         // Count this user's groups which have a role that can access the main site
         $roleCount = DB::query("
-			SELECT COUNT(\"PermissionRoleCode\".\"ID\")
-			FROM \"Group\"
-			INNER JOIN \"Group_Members\" ON \"Group_Members\".\"GroupID\" = \"Group\".\"ID\"
-			INNER JOIN \"Group_Roles\" ON \"Group_Roles\".\"GroupID\"=\"Group\".\"ID\"
-			INNER JOIN \"PermissionRole\" ON \"Group_Roles\".\"PermissionRoleID\"=\"PermissionRole\".\"ID\"
-			INNER JOIN \"PermissionRoleCode\" ON \"PermissionRole\".\"ID\"=\"PermissionRoleCode\".\"RoleID\"
-			WHERE \"PermissionRoleCode\".\"Code\" IN ('$SQL_perms')
-			AND \"Group\".\"AccessAllSubsites\" = 1
-			AND \"MemberID\" = {$memberID}
-		")->value();
+            SELECT COUNT(\"PermissionRoleCode\".\"ID\")
+            FROM \"Group\"
+            INNER JOIN \"Group_Members\" ON \"Group_Members\".\"GroupID\" = \"Group\".\"ID\"
+            INNER JOIN \"Group_Roles\" ON \"Group_Roles\".\"GroupID\"=\"Group\".\"ID\"
+            INNER JOIN \"PermissionRole\" ON \"Group_Roles\".\"PermissionRoleID\"=\"PermissionRole\".\"ID\"
+            INNER JOIN \"PermissionRoleCode\" ON \"PermissionRole\".\"ID\"=\"PermissionRoleCode\".\"RoleID\"
+            WHERE \"PermissionRoleCode\".\"Code\" IN ('$SQL_perms')
+            AND \"Group\".\"AccessAllSubsites\" = 1
+            AND \"MemberID\" = {$memberID}
+        ")->value();
 
         // There has to be at least one that allows access.
         return ($groupCount + $roleCount > 0);
     }
 
     /**
-     *
      * @var array
      */
     private static $db = array(
@@ -561,7 +563,6 @@ class Subsite extends DataObject
     );
 
     /**
-     *
      * @var array
      */
     private static $has_many = array(
@@ -569,7 +570,6 @@ class Subsite extends DataObject
     );
 
     /**
-     *
      * @var array
      */
     private static $belongs_many_many = array(
@@ -577,7 +577,6 @@ class Subsite extends DataObject
     );
 
     /**
-     *
      * @var array
      */
     private static $defaults = array(
@@ -585,7 +584,6 @@ class Subsite extends DataObject
     );
 
     /**
-     *
      * @var array
      */
     private static $searchable_fields = array(
@@ -595,10 +593,14 @@ class Subsite extends DataObject
     );
 
     /**
-     *
      * @var string
      */
     private static $default_sort = "\"Title\" ASC";
+
+    /**
+     * @var string
+     */
+    private static $table_name = "Subsite";
 
     /**
      * @todo Possible security issue, don't grant edit permissions to everybody.
@@ -862,8 +864,8 @@ class Subsite extends DataObject
         );
 
         return <<<JS
-			statusMessage($message, 'good');
-			$('Form_EditForm').loadURLFromServer('admin/subsites/show/$newItem->ID');
+            statusMessage($message, 'good');
+            $('Form_EditForm').loadURLFromServer('admin/subsites/show/$newItem->ID');
 JS;
     }
 
@@ -894,8 +896,8 @@ JS;
             "\"Group\".\"SubsiteID\" = $this->ID AND \"Permission\".\"Code\" IN ('$SQL_permissionCodes')",
             '',
             "LEFT JOIN \"Group_Members\" ON \"Member\".\"ID\" = \"Group_Members\".\"MemberID\"
-			LEFT JOIN \"Group\" ON \"Group\".\"ID\" = \"Group_Members\".\"GroupID\"
-			LEFT JOIN \"Permission\" ON \"Permission\".\"GroupID\" = \"Group\".\"ID\""
+            LEFT JOIN \"Group\" ON \"Group\".\"ID\" = \"Group_Members\".\"GroupID\"
+            LEFT JOIN \"Permission\" ON \"Permission\".\"GroupID\" = \"Group\".\"ID\""
         );
     }
 

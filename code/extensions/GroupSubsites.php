@@ -1,5 +1,7 @@
 <?php
 
+namespace SilverStripe\Subsites\Extensions;
+
 use SilverStripe\Control\Cookie;
 use SilverStripe\Core\Convert;
 use SilverStripe\Forms\CheckboxSetField;
@@ -12,6 +14,7 @@ use SilverStripe\ORM\DB;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\PermissionProvider;
+use SilverStripe\Subsites\Model\Subsite;
 
 /**
  * Extension for the Group object to add subsites support
@@ -25,7 +28,7 @@ class GroupSubsites extends DataExtension implements PermissionProvider
     );
 
     private static $many_many = array(
-        'Subsites' => 'Subsite'
+        'Subsites' => Subsite::class
     );
 
     private static $defaults = array(

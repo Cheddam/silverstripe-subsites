@@ -1,10 +1,14 @@
 <?php
 
-use SilverStripe\Forms\GridField\GridFieldDetailForm;
+namespace SilverStripe\Subsites;
+
 use SilverStripe\Admin\ModelAdmin;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Subsites\Forms\GridFieldSubsiteDetailForm;
+
 /**
  * Admin interface to manage and create {@link Subsite} instances.
- * 
+ *
  * @package subsites
  */
 class SubsiteAdmin extends ModelAdmin
@@ -12,11 +16,11 @@ class SubsiteAdmin extends ModelAdmin
     private static $managed_models = array('Subsite');
 
     private static $url_segment = 'subsites';
-    
+
     private static $menu_title = "Subsites";
 
     private static $menu_icon = "subsites/images/subsites.png";
-    
+
     public $showImportForm=false;
 
     private static $tree_class = 'Subsite';

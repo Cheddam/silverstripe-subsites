@@ -1,7 +1,11 @@
 <?php
 
-use SilverStripe\Forms\HiddenField;
+namespace SilverStripe\Subsites\Extensions;
+
 use SilverStripe\Core\Extension;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Subsites\Model\Subsite;
+
 class CMSPageAddControllerExtension extends Extension
 {
     public function updatePageOptions(&$fields)

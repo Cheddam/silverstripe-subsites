@@ -1,5 +1,7 @@
 <?php
 
+namespace SilverStripe\Subsites\Tests;
+
 use SilverStripe\Security\Member;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
@@ -51,7 +53,7 @@ class SubsiteAdminFunctionalTest extends FunctionalTest
     {
         $member = $this->objFromFixture(Member::class, 'admin');
         Session::set("loggedInAs", $member->ID);
-        
+
         $this->getAndFollowAll('admin/pages/?SubsiteID=0');
         $this->assertEquals(Subsite::currentSubsiteID(), '0', 'Can access main site.');
         $this->assertRegExp('#^admin/pages.*#', $this->mainSession->lastUrl(), 'Lands on the correct section');
@@ -70,7 +72,7 @@ class SubsiteAdminFunctionalTest extends FunctionalTest
     {
         $member = $this->objFromFixture(Member::class, 'admin');
         Session::set("loggedInAs", $member->ID);
-        
+
         $mainSubsitePage = $this->objFromFixture('Page', 'mainSubsitePage');
         $subsite1Home = $this->objFromFixture('Page', 'subsite1_home');
 

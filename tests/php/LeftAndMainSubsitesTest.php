@@ -1,5 +1,7 @@
 <?php
 
+namespace SilverStripe\Subsites\Tests;
+
 use SilverStripe\Security\Member;
 use SilverStripe\CMS\Controllers\CMSMain;
 use SilverStripe\Admin\LeftAndMain;
@@ -51,16 +53,16 @@ class LeftAndMainSubsitesTest extends FunctionalTest
         $admin = $this->objFromFixture(Member::class, "admin");
         $this->loginAs($admin);
         $ids = array();
-        
+
         $subsite1 = $this->objFromFixture('Subsite', 'domaintest1');
         $subsite2 = $this->objFromFixture('Subsite', 'domaintest2');
         $subsite3 = $this->objFromFixture('Subsite', 'domaintest3');
-        
+
         $ids[] = $subsite1->ID;
         $ids[] = $subsite2->ID;
         $ids[] = $subsite3->ID;
         $ids[] = 0;
-        
+
         // Enable session-based subsite tracking.
         Subsite::$use_session_subsiteid = true;
 

@@ -1,11 +1,15 @@
 <?php
 
-use SilverStripe\Forms\OptionsetField;
+namespace SilverStripe\Subsites\Model;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Control\Director;
-use SilverStripe\Control\Controller;
+use SilverStripe\Forms\OptionsetField;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Subsites\Forms\WildcardDomainField;
+use SilverStripe\Subsites\Model\Subsite;
 
 /**
  * @property string $Domain domain name of this subsite. Can include wildcards. Do not include the URL scheme here
@@ -26,6 +30,8 @@ class SubsiteDomain extends DataObject
         "Protocol" => "Enum('http,https,automatic','automatic')",
         "IsPrimary" => "Boolean",
     );
+
+    private static $table_name = "SubsiteDomain";
 
     /**
      * Specifies that this subsite is http only
@@ -88,9 +94,9 @@ class SubsiteDomain extends DataObject
     {
         Subsite::writeHostMap();
     }
-    
+
     /**
-     * 
+     *
      * @return \FieldList
      */
     public function getCMSFields()
@@ -125,7 +131,7 @@ class SubsiteDomain extends DataObject
     }
 
     /**
-     * 
+     *
      * @param bool $includerelations
      * @return array
      */
@@ -190,7 +196,7 @@ class SubsiteDomain extends DataObject
         // Default to "subsite." prefix for first wildcard
         // TODO Whats the significance of "subsite" in this context?!
         $domain = preg_replace('/^\*\./', "subsite.", $domain);
-        
+
         // *Only* removes "intermediate" subdomains, so 'subdomain.www.domain.com' becomes 'subdomain.domain.com'
         $domain = str_replace('.www.', '.', $domain);
 

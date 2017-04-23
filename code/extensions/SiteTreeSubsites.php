@@ -1,29 +1,33 @@
 <?php
 
+namespace SilverStripe\Subsites\Extensions;
+
 use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\ORM\DataQuery;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\CheckboxField;
-use SilverStripe\Forms\InlineFormAction;
-use SilverStripe\Forms\ToggleCompositeField;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Controller;
-use SilverStripe\ORM\Queries\SQLSelect;
-use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\Security\Member;
-use SilverStripe\View\SSViewer;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTP;
 use SilverStripe\Core\Convert;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\InlineFormAction;
+use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DataQuery;
+use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\Security\Member;
+use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Subsites\Model\Subsite;
+use SilverStripe\View\SSViewer;
 
 /**
  * Extension for the SiteTree object to add subsites support
  */
 class SiteTreeSubsites extends DataExtension
 {
+
     private static $has_one = array(
         'Subsite' => 'Subsite', // The subsite that this page belongs to
     );
@@ -44,11 +48,11 @@ class SiteTreeSubsites extends DataExtension
         return false;
     }
 
-	/**
-	 * Update any requests to limit the results to the current site
-	 * @param SQLSelect $query
-	 * @param DataQuery $dataQuery
-	 */
+    /**
+     * Update any requests to limit the results to the current site
+     * @param SQLSelect $query
+     * @param DataQuery $dataQuery
+     */
     public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
         if (Subsite::$disable_subsite_filter) {
@@ -107,16 +111,16 @@ class SiteTreeSubsites extends DataExtension
             $fields->addFieldsToTab(
                 'Root.Main',
                 ToggleCompositeField::create('SubsiteOperations',
-                	_t('SiteTreeSubsites.SubsiteOperations', 'Subsite Operations'),
-                	array(
-						new DropdownField("CopyToSubsiteID", _t('SiteTreeSubsites.CopyToSubsite', "Copy page to subsite"), $subsitesMap),
-						new CheckboxField("CopyToSubsiteWithChildren", _t('SiteTreeSubsites.CopyToSubsiteWithChildren', 'Include children pages?')),
-						$copyAction = new InlineFormAction(
-							"copytosubsite",
-							_t('SiteTreeSubsites.CopyAction', "Copy")
-						)
-					)
-				)->setHeadingLevel(4)
+                    _t('SiteTreeSubsites.SubsiteOperations', 'Subsite Operations'),
+                    array(
+                        new DropdownField("CopyToSubsiteID", _t('SiteTreeSubsites.CopyToSubsite', "Copy page to subsite"), $subsitesMap),
+                        new CheckboxField("CopyToSubsiteWithChildren", _t('SiteTreeSubsites.CopyToSubsiteWithChildren', 'Include children pages?')),
+                        $copyAction = new InlineFormAction(
+                            "copytosubsite",
+                            _t('SiteTreeSubsites.CopyAction', "Copy")
+                        )
+                    )
+                )->setHeadingLevel(4)
             );
 
 
@@ -269,10 +273,10 @@ class SiteTreeSubsites extends DataExtension
         Subsite::changeSubsite($oldSubsite);
 
         if($includeChildren) {
-			foreach($this->owner->AllChildren() as $child) {
-				$child->duplicateToSubsite($subsiteID, $includeChildren, $page->ID);
-			}
-		}
+            foreach($this->owner->AllChildren() as $child) {
+                $child->duplicateToSubsite($subsiteID, $includeChildren, $page->ID);
+            }
+        }
 
         return $page;
     }
@@ -413,4 +417,5 @@ class SiteTreeSubsites extends DataExtension
             }
         }
     }
+
 }

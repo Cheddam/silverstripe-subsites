@@ -1,19 +1,23 @@
 <?php
 
+namespace SilverStripe\Subsites\Extensions;
+
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataQuery;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Subsites\Model\Subsite;
 
 /**
  * Extension for the SiteConfig object to add subsites support
  */
 class SiteConfigSubsites extends DataExtension
 {
+
     private static $has_one = array(
-        'Subsite' => 'Subsite', // The subsite that this page belongs to
+        'Subsite' => Subsite::class, // The subsite that this page belongs to
     );
 
     /**
@@ -68,4 +72,5 @@ class SiteConfigSubsites extends DataExtension
     {
         $fields->push(new HiddenField('SubsiteID', 'SubsiteID', Subsite::currentSubsiteID()));
     }
+
 }

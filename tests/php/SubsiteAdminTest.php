@@ -1,5 +1,7 @@
 <?php
 
+namespace SilverStripe\Subsites\Tests;
+
 use SilverStripe\Security\Member;
 use SilverStripe\Control\Session;
 use SilverStripe\Control\Director;
@@ -26,14 +28,14 @@ class SubsiteAdminTest extends BaseSubsiteTest
 
         // Open the admin area logged in as admin
         $response1 = Director::test('admin/subsites/', null, $this->adminLoggedInSession());
-        
+
         // Confirm that this URL gets you the entire page, with the edit form loaded
         $response2 = Director::test("admin/subsites/Subsite/EditForm/field/Subsite/item/$subsite1ID/edit", null, $this->adminLoggedInSession());
         $this->assertTrue(strpos($response2->getBody(), 'id="Form_ItemEditForm_ID"') !== false, "Testing Form_ItemEditForm_ID exists");
         $this->assertTrue(strpos($response2->getBody(), '<head') !== false, "Testing <head> exists");
     }
 
-    
+
     /**
      * Test that the main-site user with ADMIN permissions can access all subsites, regardless
      * of whether he is in a subsite-specific group or not.
@@ -42,7 +44,7 @@ class SubsiteAdminTest extends BaseSubsiteTest
     {
         $member = $this->objFromFixture(Member::class, 'admin');
         Session::set("loggedInAs", $member->ID);
-        
+
         $cmsMain = new CMSMain();
         foreach ($cmsMain->Subsites() as $subsite) {
             $ids[$subsite->ID] = true;
