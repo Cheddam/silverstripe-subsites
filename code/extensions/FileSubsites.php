@@ -6,8 +6,12 @@
  */
 class FileSubsites extends DataExtension
 {
-    // If this is set to true, all folders created will be default be
-    // considered 'global', unless set otherwise
+    /**
+     * If this is set to true, all files and folders created will be
+     * flagged as global (SubsiteID of 0) unless otherwise specified
+     *
+     * @todo  Rename this to make more sense (breaks the API)
+     */
     public static $default_root_folders_global = false;
 
     private static $has_one=array(
@@ -97,7 +101,7 @@ class FileSubsites extends DataExtension
     public function onBeforeWrite()
     {
         if (!$this->owner->ID && !$this->owner->SubsiteID) {
-            if (self::$default_root_folders_global) {
+            if (Config::inst()->get('FileSubsites', 'default_root_folders_global')) {
                 $this->owner->SubsiteID = 0;
             } else {
                 $this->owner->SubsiteID = Subsite::currentSubsiteID();
